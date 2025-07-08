@@ -27,7 +27,7 @@ type AnalyzeResponse struct {
 	ExecutionError  string      `json:"execution_error,omitempty"`
 }
 
-// ✅ CORS Middleware global
+
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Configurar headers CORS
@@ -37,24 +37,27 @@ func corsMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Expose-Headers", "Content-Length")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		// Si es un preflight request (OPTIONS), responder inmediatamente
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 
-		// Continuar con el siguiente handler
+	
 		next.ServeHTTP(w, r)
 	})
 }
 
 func main() {
-	// Initialize dependencies
-	lexer := lexer.NewMongoLexer()
-	parser := parser.NewMongoParser()
-	validator := validator.NewMongoValidator()
-	executor := executor.NewMongoExecutor("mongodb://localhost:27017")
-	
+	mongoURL := "mongodb+srv://Edgar24:ECBASE24@edgar24.kjbvs5h.mongodb.net/mi_database?retryWrites=true&w=majority&appName=Edgar24"
+    
+    log.Printf("Intentando conectar a MongoDB...")
+    log.Printf("URL: %s", mongoURL)
+    
+    // Initialize dependencies
+    lexer := lexer.NewMongoLexer()
+    parser := parser.NewMongoParser()
+    validator := validator.NewMongoValidator()
+    executor := executor.NewMongoExecutor(mongoURL)
 	analyzer := services.NewMongoAnalyzerService(lexer, parser, validator, executor)
 
 	// Connect to MongoDB
@@ -65,19 +68,19 @@ func main() {
 
 	router := mux.NewRouter()
 	
-	// ✅ Aplicar middleware CORS a todas las rutas
+	
 	router.Use(corsMiddleware)
 	
 	// Rutas
 	router.HandleFunc("/analyze", func(w http.ResponseWriter, r *http.Request) {
 		handleAnalyze(w, r, analyzer)
-	}).Methods("POST", "OPTIONS") // ✅ Agregar OPTIONS explícitamente
+	}).Methods("POST", "OPTIONS") 
 
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	}).Methods("GET", "OPTIONS") // ✅ Agregar OPTIONS explícitamente
+	}).Methods("GET", "OPTIONS") 
 
 	fmt.Println("🚀 Servidor iniciado en puerto 8080")
 	fmt.Println("🔍 Endpoint: POST /analyze")
@@ -87,7 +90,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-// ✅ Función simplificada (CORS ya manejado en middleware)
 func handleAnalyze(w http.ResponseWriter, r *http.Request, analyzer *services.MongoAnalyzerService) {
 	w.Header().Set("Content-Type", "application/json")
 

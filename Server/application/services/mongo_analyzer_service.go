@@ -40,7 +40,7 @@ func (s *MongoAnalyzerService) Analyze(input string) (*entities.AnalysisResult, 
 		}, nil
 	}
 
-	// Fase 2: Análisis Sintáctico
+	
 	command, err := s.parser.Parse(tokens)
 	if err != nil {
 		return &entities.AnalysisResult{
@@ -61,7 +61,7 @@ func (s *MongoAnalyzerService) Analyze(input string) (*entities.AnalysisResult, 
 		}, nil
 	}
 
-	// Fase 3: Análisis Semántico
+	
 	if err := s.validator.ValidateSemantics(command); err != nil {
 		return &entities.AnalysisResult{
 			Command:      command,
@@ -72,7 +72,7 @@ func (s *MongoAnalyzerService) Analyze(input string) (*entities.AnalysisResult, 
 		}, nil
 	}
 
-	// Fase 4: Ejecución
+	
 	var executionResult interface{}
 	var executionError error
 
@@ -89,7 +89,7 @@ func (s *MongoAnalyzerService) Analyze(input string) (*entities.AnalysisResult, 
 	}, nil
 }
 
-// ✅ CORREGIDO: Usar _ para parámetros intencionalmente no usados
+
 func (s *MongoAnalyzerService) generateLexicalFix(_ string, err error) string {
 	// Sugerencias básicas para errores léxicos
 	if strings.Contains(err.Error(), "token inválido") {
@@ -98,7 +98,7 @@ func (s *MongoAnalyzerService) generateLexicalFix(_ string, err error) string {
 	return "Revisa la sintaxis del comando"
 }
 
-// ✅ CORREGIDO: Usar _ para parámetros intencionalmente no usados
+
 func (s *MongoAnalyzerService) generateSyntacticFix(_ string, err error) string {
 	errorMsg := err.Error()
 	
@@ -118,19 +118,18 @@ func (s *MongoAnalyzerService) generateSyntacticFix(_ string, err error) string 
 	return "Revisa la sintaxis del comando MongoDB"
 }
 
-// ✅ CORREGIDO: Arreglar fmt.Errorf con format string no constante
+
 func (s *MongoAnalyzerService) generateSyntacticFixFromCommand(command *entities.MongoCommand) string {
 	if len(command.Errors) > 0 {
-		// Opción 1: Crear error con format string correcto
+		
 		return s.generateSyntacticFix("", fmt.Errorf("%s", command.Errors[0]))
 		
-		// Opción 2: Pasar directamente el string (más simple)
-		// return s.generateSyntacticFix("", errors.New(command.Errors[0]))
+		
 	}
 	return "Comando sintácticamente incorrecto"
 }
 
-// ✅ CORREGIDO: Usar _ para parámetros intencionalmente no usados
+
 func (s *MongoAnalyzerService) generateSemanticFix(_ *entities.MongoCommand, err error) string {
 	errorMsg := err.Error()
 	
